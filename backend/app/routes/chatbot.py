@@ -20,6 +20,10 @@ chatbot_bp = Blueprint('chatbot', __name__, url_prefix='/chatbot')
 @chatbot_bp.route('/add_bot', methods = ['POST'])
 @token_required
 def add_bot(current_user):
+    
+    if current_user.superuser != 1:
+        return {'message':'You are not allowed'}, 400
+
     data = request.form
     if not data['name'] or not data['prompt']:
         return {'message':'Please fill all fields'}, 400
