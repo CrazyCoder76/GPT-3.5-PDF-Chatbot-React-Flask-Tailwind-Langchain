@@ -8,8 +8,6 @@ from auth_middleware import token_required
 import re
 import jwt
 import datetime
-from google.oauth2 import id_token
-from google.auth.transport import requests
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -34,7 +32,8 @@ def user_info(current_user):
     return {
         'first_name': current_user.first_name,
         'last_name': current_user.last_name,
-        'email': current_user.email
+        'email': current_user.email,
+        'superuser': current_user.superuser
     }
 
 @auth_bp.route('/register', methods=['POST'])
@@ -48,6 +47,7 @@ def register():
         return {'message': 'Fill all fields'}, 400
     if len(password) < 6:
         return {'message' : 'Password length must be at least 6!'}, 400
+    
     user = User.query.filter_by(email=email).first()
     if user != None:
         return {'message' : 'Same email already exists'}, 400
@@ -58,7 +58,8 @@ def register():
         email = email,
         password = bcrypt.generate_password_hash(password, 10).decode('utf-8'),
         first_name = first_name,
-        last_name = last_name
+        last_name = last_name,
+        superuser = 0
     )
     db.session.add(user)
     db.session.commit()
@@ -82,52 +83,10 @@ def login():
         'id': validated_user.id,
         'email': validated_user.email,
         'first_name': validated_user.first_name,
-        'last_name': validated_user.last_name
+        'last_name': validated_user.last_name,
+        'superuser': validated_user.superuser
     }}
 
-@auth_bp.route('/oauth', methods = ['POST'])
-def oauth():
-    token = request.json['credential']
-    try:
-        # Specify the CLIENT_ID of the app that accesses the backend:
-        idinfo = id_token.verify_oauth2_token(token, requests.Request(), Config.GOOGLE_CLIENT_ID)
-
-        # ID token is valid. Get the user's Google Account ID from the decoded token.
-        user_id = idinfo['sub']
-        
-        # You can also get other information from the token
-        email = idinfo.get('email')
-        user = User.query.filter_by(email=email).first()
-        first_name, last_name = '', ''
-        if user is None:
-            name = idinfo.get('name')
-            first_name,last_name = name.split(' ')
-            user = User(
-                email = email,
-                first_name = first_name,
-                last_name = last_name
-            )
-            db.session.add(user)
-            db.session.commit()
-        else:
-            first_name, last_name = user.first_name, user.last_name
-            # You might want to create a user in your DB with this information, or update an existing one
-        token = jwt.encode({
-            'user_id' : user.id,
-            'exp': datetime.datetime.now() + datetime.timedelta(hours=24)
-            }, Config.SECRET_KEY)
-        return {
-            'token' : token,
-            'user': {
-                'id': user.id,
-                'email': email,
-                'first_name': first_name,
-                'last_name': last_name}
-            }, 200
-    except ValueError:
-        # Invalid token
-        pass
-    return {'message':"Token is invalid or expired"}, 401
 
 @auth_bp.route('/avatar/<img_id>')
 def get_image(img_id):

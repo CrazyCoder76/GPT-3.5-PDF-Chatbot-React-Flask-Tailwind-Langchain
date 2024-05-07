@@ -118,8 +118,8 @@ const ChatComponent: React.FC<Props> = ({ session_id }) => {
     }, [session_id])
 
     return (
-        <div className='w-full h-full p-5 flex flex-col gap-3'>
-            <div className="overflow-auto h-full">
+        <div className='w-full h-full flex flex-col gap-3'>
+            <div className="overflow-auto h-full p-5">
                 {
                     messages.map((message, index) => (
                         <div key={index} className={`chat ${message.from == 'user' ? 'chat-end' : 'chat-start'}`}>
@@ -135,8 +135,7 @@ const ChatComponent: React.FC<Props> = ({ session_id }) => {
                                 </div>
                             </div>
                             <div
-                                style={message.from == 'ai' ? { backgroundColor:  'var(--fallback-pc,oklch(var(--pc)/var(--tw-bg-opacity)))' } : {}}
-                                className={`chat-bubble ${message.from == 'ai' ? "bg-primary-content" : "bg-secondary-content"}`}>
+                                className={`chat-bubble ${message.from == 'ai' ? "bg-base-300" : "bg-primary-content"}`}>
                                 <ReactMarkdown className='prose lg:prose-xl max-w-none'>
                                     {message.message}
                                 </ReactMarkdown>
@@ -145,7 +144,7 @@ const ChatComponent: React.FC<Props> = ({ session_id }) => {
                     ))
                 }
                 { isAILoading &&
-                    <div className="chat chat-start">
+                <div className="chat chat-start">
                     <div className="chat-image avatar">
                         <div className="w-10 rounded-full">
                             <img
@@ -155,8 +154,8 @@ const ChatComponent: React.FC<Props> = ({ session_id }) => {
                         </div>
                     </div>
                     <div
-                        style={{ backgroundColor:  'var(--fallback-pc,oklch(var(--pc)/var(--tw-bg-opacity)))' }}
-                        className="chat-bubble bg-primary-content"
+                        style={{ backgroundColor:  'var(--fallback-pc,oklch(var(--b3)/var(--tw-bg-opacity)))' }}
+                        className="chat-bubble bg-base-300"
                     >
                     { aiLoadingMessage == ""
                         ? <ThreeDots
@@ -179,7 +178,7 @@ const ChatComponent: React.FC<Props> = ({ session_id }) => {
                 <div ref={dummy}></div>
             </div>
 
-            <div className="flex gap-3 flex-wrap py-3">
+            <div className="flex gap-3 flex-wrap py-2 px-5">
                 {
                     suggested.split('\n').map((val, index) => val ?
                         <button key={index} className="btn btn-primary" onClick={() => {
@@ -190,7 +189,7 @@ const ChatComponent: React.FC<Props> = ({ session_id }) => {
                         : null)
                 }
             </div>
-            <div>
+            <div className="p-5 pt-0">
                 <input
                     value={content}
                     onChange={(e) => setContent(e.target.value)}

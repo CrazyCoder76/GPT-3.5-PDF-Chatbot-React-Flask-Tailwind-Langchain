@@ -13,6 +13,7 @@ from sqlalchemy.orm.attributes import flag_modified
 from app import Config
 from PyPDF2 import PdfReader
 import os
+import shutil
 
 chatbot_bp = Blueprint('chatbot', __name__, url_prefix='/chatbot')
 
@@ -26,14 +27,13 @@ def add_bot(current_user):
     files = request.files
     file_names = []
     chatbot_id = uuid.uuid4().hex
+    os.mkdir(f"upload/{chatbot_id}")
 
     for key, storage in files.items(multi=True):
-        os.mkdir(f"upload/{chatbot_id}")
         path = f"upload/{chatbot_id}/{storage.filename}"
         storage.save(path)
 
         file_names.append(storage.filename)
-    
 
     detected_texts = []
     for file_name in file_names:
@@ -43,6 +43,7 @@ def add_bot(current_user):
         pdf_reader = PdfReader(pdf_file_obj)
         num_pages = len(pdf_reader.pages)
 
+        detected_text += f"File name: {file_name}\n"
         for page_num in range(num_pages):
             page_obj = pdf_reader.pages[page_num]
             detected_text += page_obj.extract_text() + "\n\n"
@@ -50,9 +51,8 @@ def add_bot(current_user):
         pdf_file_obj.close()
         detected_texts.append(detected_text)
 
-        os.remove(file_path)
-    
-    os.rmdir(f"upload/{chatbot_id}")
+    if os.path.exists(f"upload/{chatbot_id}"):
+        shutil.rmtree(f"upload/{chatbot_id}")
 
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     texts = text_splitter.create_documents(detected_texts)
@@ -84,14 +84,14 @@ def chatbot_list(current_user):
     return  [{
             'id': chatbot.id,
             'name': chatbot.name
-    } for chatbot in Chatbot.query.filter_by(user_id = current_user.id)]
+    } for chatbot in Chatbot.query.all()]
 
 @chatbot_bp.route('/get_model_info', methods=['POST'])
 @token_required
 def get_model_info(current_user):
     bot = Chatbot.query.filter_by(id=request.json['id'], user_id = current_user.id).first()
     if bot is None:
-        return {'message':'You are not allowed to see others setting'}, 400
+        return {'message':'You are not allowed'}, 400
     return {
         'id':bot.id,
         'name':bot.name,
@@ -104,18 +104,29 @@ def get_model_info(current_user):
 def update_model_info(current_user):
     bot = Chatbot.query.filter_by(id=request.json['id'], user_id = current_user.id).first()
     if bot is None:
-        return {'message':'You are not allowed to see others setting'}, 400
+        return {'message':'You are not allowed'}, 400
     bot.name = request.json['name']
     bot.prompt = request.json['prompt']
     db.session.commit()
     return "success"
+
+@chatbot_bp.route('/delete_chatbot', methods=['POST'])
+@token_required
+def delete_chatbot(current_user):
+    bot = Chatbot.query.filter_by(id=request.json['id'], user_id = current_user.id).first()
+    if bot is None:
+        return {'message':'You are not allowed'}, 400
+    
+    db.session.delete(bot)
+    db.session.commit()
+    return {'message': 'Chatbot deleted successfully'}, 200
 
 @chatbot_bp.route('/get_chatbot_setting', methods = ['POST'])
 @token_required
 def get_chatbot_setting(current_user):
     bot = Chatbot.query.filter_by(id=request.json['id'], user_id = current_user.id).first()
     if bot is None:
-        return {'message':'You are not allowed to see others setting'}, 400
+        return {'message':'You are not allowed'}, 400
     return {
         'initial' : bot.initial,
         'placeholder' : bot.placeholder,
@@ -128,7 +139,7 @@ def get_chatbot_setting(current_user):
 def update_chatbot_setting(current_user):
     bot = Chatbot.query.filter_by(id=request.form['id'], user_id = current_user.id).first()
     if bot is None:
-        return {'message':'You are not allowed to see others setting'}, 400
+        return {'message':'You are not allowed'}, 400
     if len(request.files) > 0:
         file_key = next(iter(request.files))
         file = request.files[file_key]
@@ -148,9 +159,9 @@ def update_chatbot_setting(current_user):
 @chatbot_bp.route('/chatbot_setting_session', methods = ['POST'])
 @token_required
 def chatbot_setting_session(current_user):
-    session = ChatbotSession.query.filter_by(id=request.json['id'], user_id = current_user.id).first()
+    session = ChatbotSession.query.filter_by(id=request.json['id']).first()
     if session is None:
-        return {'message':'You are not allowed to see others setting'}, 400
+        return {'message':'You are not allowed'}, 400
     bot = session.chatbot
     return {
         'initial' : bot.initial,
@@ -188,10 +199,10 @@ def get_ai_resposne(current_user):
         return {'message':'Chatbot not found'}, 500
     
     vector_index = FAISS.load_local(f"index_store/{chatbot.index_name}", current_app.embeddings)
-    retriever = vector_index.as_retriever(search_type="similarity", search_kwargs={"k": 3})
+    retriever = vector_index.as_retriever(search_type="similarity", search_kwargs={"k": 6})
 
-    llm = ChatOpenAI(temperature=0, api_key=Config.OPENAI_KEY)
-    conv_interface = ConversationalRetrievalChain.from_llm(llm, retriever=retriever)
+    llm = ChatOpenAI(temperature=0.7, api_key=Config.OPENAI_KEY, model_name='gpt-3.5-turbo')
+    conv_interface = ConversationalRetrievalChain.from_llm(llm, retriever=retriever, return_source_documents=True, verbose=False)
 
     db_chat_history = chatbot_session.chat_history
     if db_chat_history is None:

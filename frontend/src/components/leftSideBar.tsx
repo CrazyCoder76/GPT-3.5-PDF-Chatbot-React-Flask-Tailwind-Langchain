@@ -21,6 +21,7 @@ const Leftsidebar: React.FC<Props> = ({ onSelectChatbot, onChatbotInterface, onC
     const dispatch = useDispatch()
     const navigate = useNavigate()
     const { addToast } = useToast()
+
     const logout = () => {
         localStorage.removeItem('token')
         axios.interceptors.request.use(config => {
@@ -30,6 +31,7 @@ const Leftsidebar: React.FC<Props> = ({ onSelectChatbot, onChatbotInterface, onC
         navigate('/login')
         googleLogout()
     }
+
     useEffect(() => {
         apiClient.post(`${import.meta.env.VITE_API_URL}/auth/user_info`)
             .then(response => {
@@ -47,13 +49,14 @@ const Leftsidebar: React.FC<Props> = ({ onSelectChatbot, onChatbotInterface, onC
             })
     }, [])
     return (
-        <div className="flex flex-col w-[350px] bg-primary-content p-3 h-full">
+        <div className="flex flex-col w-[350px] bg-base-200 p-3 h-full">
             <div className="dropdown dropdown-right ">
                 <div tabIndex={0}
                     role="button"
-                    className="flex items-center justify-center  gap-3 hover:bg-base-300 rounded-full">
+                    className="flex items-center gap-2 p-2 rounded-xl hover:bg-base-300"
+                >
                     <div className="avatar">
-                        <div className="w-12 rounded-full">
+                        <div className="w-10 rounded-full">
                             <img src={UserImage} />
                         </div>
                     </div>

@@ -7,5 +7,5 @@ class User(db.Model):
     last_name = db.Column(db.String(20), nullable = False)
     email = db.Column(db.String(64), unique = True, nullable = False)
     password = db.Column(db.String(64))
-    chatbots = db.relationship('Chatbot', backref = 'user')
+    superuser = db.Column(db.Integer)
     chatbot_sessions = db.relationship('ChatbotSession', backref = 'user')

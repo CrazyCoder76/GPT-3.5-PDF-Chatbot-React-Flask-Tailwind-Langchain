@@ -1,16 +1,13 @@
 import { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios';
-import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 import { useToast } from '../../components/toast';
-import { useDispatch } from 'react-redux';
-import { setUserData } from '../../redux/auth/actions';
 import apiClient from '../../utils/apiClient';
 
 const Login = () => {
     const navigate = useNavigate()
-    const dispatch = useDispatch()
     const { addToast } = useToast()
+    
     const onSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const data: any = e.currentTarget.elements
@@ -31,24 +28,7 @@ const Login = () => {
                 addToast(reason.response.data.message, 'error')
             })
     }
-    const responseMessage = (response: CredentialResponse) => {
-        console.log(response)
-        apiClient.post(`${import.meta.env.VITE_API_URL}/auth/oauth`, {
-            credential: response.credential
-        })
-            .then(response => {
-                const { token, user } = response.data
-                localStorage.setItem('token', token)
-                dispatch(setUserData(user))
-                navigate('/')
-            })
-            .catch(reason => {
-                addToast(reason.response.data.message, 'error')
-            })
-    };
-    const errorMessage = () => {
-        // console.log(error);
-    };
+
     return (
         <div className='h-[100vh] flex flex-col items-center justify-center gap-3'>
             <div className='prose lg:prose-xl m-3'>
@@ -70,7 +50,6 @@ const Login = () => {
             <div>
                 Not registered yet? <Link to='/register'>Register</Link>
             </div>
-            <GoogleLogin onSuccess={responseMessage} onError={errorMessage} />
         </div>
     )
 }

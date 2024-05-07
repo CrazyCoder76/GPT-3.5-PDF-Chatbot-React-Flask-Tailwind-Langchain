@@ -4,6 +4,7 @@ import { useToast } from './toast';
 import { useDispatch } from 'react-redux';
 import { addChatbot } from '../redux/chatbot/actions';
 import apiClient from '../utils/apiClient';
+import { RotatingLines } from "react-loader-spinner"
 
 const AddChatBot: React.FC = () => {
     const [files, setFiles] = useState<File[]>([]);
@@ -11,6 +12,7 @@ const AddChatBot: React.FC = () => {
     const [chatbotName, setChatBotName] = useState<string>('')
     const { addToast } = useToast()
     const dispatch = useDispatch()
+    const [isAddingBot, setIsAddingBot] = useState<boolean>(false);
 
     // Handle file selection
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -34,17 +36,21 @@ const AddChatBot: React.FC = () => {
         formData.append('prompt', chatbotPrompt)
         formData.append('name', chatbotName)
 
+        setIsAddingBot(true);
+
         apiClient.post(`${import.meta.env.VITE_API_URL}/chatbot/add_bot`, formData, {
             headers: {
                 "Content-Type": 'multipart/form-data'
             }
         })
             .then(response => {
-                console.log(response)
+
+                setIsAddingBot(false);
                 dispatch(addChatbot(response.data))
                 document.getElementById('close_btn')?.click()
             })
             .catch(error => {
+                setIsAddingBot(false);
                 addToast(error.response.data.message, 'error')
             })
     }
@@ -85,7 +91,18 @@ const AddChatBot: React.FC = () => {
                         <button id='submit_btn' type='submit' hidden />
                     </form>
                     <div className="modal-action">
-                        <button className='btn' onClick={createBotClicked}>Create</button>
+                        <button className='btn' onClick={createBotClicked}>
+                        { isAddingBot
+                            ? <RotatingLines
+                                visible={true}
+                                width="24"
+                                strokeWidth="5"
+                                animationDuration="0.75"
+                                ariaLabel="rotating-lines-loading"
+                            />
+                            : "Create"
+                        }
+                        </button>
                         <label htmlFor="my_modal_6" id='close_btn' className="btn">Close</label>
                     </div>
                 </div>
