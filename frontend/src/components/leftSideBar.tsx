@@ -14,8 +14,9 @@ interface Props {
     onChatbotInterface: (id: string) => void,
     onChatbotDelete: (id: string) => void,
     onChatbotModel: (id: string) => void,
+    refresh: boolean
 }
-const Leftsidebar: React.FC<Props> = ({ onSelectChatbot, onChatbotInterface, onChatbotDelete, onChatbotModel }) => {
+const Leftsidebar: React.FC<Props> = ({ onSelectChatbot, onChatbotInterface, onChatbotDelete, onChatbotModel, refresh }) => {
     const me = useSelector((state: any) => state.AuthReducer.user)
     const chatbots = useSelector((state: any) => state.ChatbotReducer.chatbots)
     const dispatch = useDispatch()
@@ -31,7 +32,7 @@ const Leftsidebar: React.FC<Props> = ({ onSelectChatbot, onChatbotInterface, onC
         navigate('/login')
     }
 
-    useEffect(() => {
+    const loadInitialData = async () => {
         apiClient.post(`${import.meta.env.VITE_API_URL}/auth/user_info`)
             .then(response => {
                 dispatch(setUserData(response.data))
@@ -46,7 +47,15 @@ const Leftsidebar: React.FC<Props> = ({ onSelectChatbot, onChatbotInterface, onC
             .catch(error => {
                 addToast(error.response.data.message, 'error')
             })
+    }
+
+    useEffect(() => {
+        loadInitialData();
     }, [])
+
+    useEffect(() => {
+        loadInitialData();
+    }, [refresh]);
 
     return (
         <div className="flex flex-col w-[350px] bg-base-200 p-3 h-full">

@@ -12,10 +12,9 @@ interface FileItem {
 
 const ChatbotModel: React.FC<Props> = ({ bot_id }) => {
     const [chatbotPrompt, setChatbotPrompt] = useState<string>('');
-    const [chatbotName, setChatBotName] = useState<string>('')
-    const [files, setFiles] = useState<FileItem[]>([])
-    const { addToast } = useToast()
-    
+    const [chatbotName, setChatBotName] = useState<string>('');
+    const [files, setFiles] = useState<FileItem[]>([]);
+    const { addToast } = useToast();
 
     const handleChatbotPromptChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
         setChatbotPrompt(event.target.value);
@@ -35,6 +34,7 @@ const ChatbotModel: React.FC<Props> = ({ bot_id }) => {
                 addToast(error.response.data.message, 'error')
             })
     }
+
     useEffect(() => {
         setFiles([])
         apiClient.post(`${import.meta.env.VITE_API_URL}/chatbot/get_model_info`, {
@@ -66,7 +66,7 @@ const ChatbotModel: React.FC<Props> = ({ bot_id }) => {
                         value={chatbotName}
                         onChange={(e) => setChatBotName(e.target.value)}
                     />
-                    <button className='btn btn-primary' type='submit'>Save</button>
+                    <button className='btn btn-outline' type='submit'>Save</button>
                 </div>
                 <textarea
                     className="textarea textarea-bordered w-full h-[300px]"
@@ -80,7 +80,7 @@ const ChatbotModel: React.FC<Props> = ({ bot_id }) => {
             <div className='divider' />
             <p className="font-bold text-lg">Uploaded files</p>
             <div className="container">
-                <ul className="list-disc mt-4 overflow-auto max-h-[300px]">
+                <ul className="list-disc overflow-auto max-h-[300px]">
                     {files.map(file => (
                         <li key={file.id} className="flex justify-between items-center p-2">
                             {file.name}

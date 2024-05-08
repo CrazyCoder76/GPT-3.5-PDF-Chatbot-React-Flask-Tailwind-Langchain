@@ -131,13 +131,12 @@ def delete_chatbot(current_user):
     if os.path.exists(f"index_store/{bot.index_name}"):
         shutil.rmtree(f"index_store/{bot.index_name}")
 
-    if bot.img_id:
-        if os.path.exists(f"app/avatar/{bot.img_id}"):
-            os.remove(f"app/avatar/{bot.img_id}")
+    if os.path.exists(f"app/avatar/{bot.img_id}"):
+        os.remove(f"app/avatar/{bot.img_id}")
     
-    sessions = ChatbotSession.query.filter_by(chatbot_id = bot.id)
-    
-    db.session.delete(sessions)
+    sessions = ChatbotSession.query.filter_by(chatbot_id = bot.id).all()
+    for session in sessions:
+        db.session.delete(session)
 
     db.session.delete(bot)
     db.session.commit()

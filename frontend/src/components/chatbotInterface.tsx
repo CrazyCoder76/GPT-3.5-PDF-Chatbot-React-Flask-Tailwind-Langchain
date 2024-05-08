@@ -2,14 +2,19 @@ import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import ChatbotImage from '../assets/icon-chatbot.png'
 import UserImage from '../assets/icon-user.png'
 import apiClient from "../utils/apiClient";
+import { RotatingLines } from "react-loader-spinner"
+import { useToast } from './toast';
 
 
 const ChatbotInterface: React.FC<{ bot_id: string }> = ({ bot_id }) => {
-    const [suggested, setSuggested] = useState<string>("")
-    const [placeholder, setPlaceholder] = useState<string>("Write your sentences here.")
-    const [initial, setInitial] = useState<string>("Hi! How can I assist you toady?")
-    const [imageSrc, setImageSrc] = useState('')
-    const [file, setFile] = useState<File>()
+    const [suggested, setSuggested] = useState<string>("");
+    const [placeholder, setPlaceholder] = useState<string>("Write your sentences here.");
+    const [initial, setInitial] = useState<string>("Hi! How can I assist you toady?");
+    const [imageSrc, setImageSrc] = useState('');
+    const [file, setFile] = useState<File>();
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const { addToast } = useToast();
+
     const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
             const f = event.target.files[0]
@@ -24,21 +29,35 @@ const ChatbotInterface: React.FC<{ bot_id: string }> = ({ bot_id }) => {
             }
         }
     };
+
     const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        const formData = new FormData()
-        formData.append('id', bot_id)
-        formData.append('suggested', suggested)
-        formData.append('placeholder', placeholder)
-        formData.append('initial', initial)
-        if (file) formData.append('files', file)
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('id', bot_id);
+        formData.append('suggested', suggested);
+        formData.append('placeholder', placeholder);
+        formData.append('initial', initial);
+        if (file) formData.append('files', file);
+
+        setIsSubmitting(true);
+
         apiClient.post(`${import.meta.env.VITE_API_URL}/chatbot/update_chatbot_setting`, formData,
             {
                 headers: {
                     "Content-Type": 'multipart/form-data'
                 }
+            }).then(() => {
+
+                addToast("Successfully updated!!!", 'success')
+            }).catch(error => {
+
+                addToast(error.response.data.message, 'error')
+            }).finally(() => {
+
+                setIsSubmitting(false);
             })
     }
+
     useEffect(() => {
         apiClient.post(`${import.meta.env.VITE_API_URL}/chatbot/get_chatbot_setting`, {
             id: bot_id
@@ -51,8 +70,12 @@ const ChatbotInterface: React.FC<{ bot_id: string }> = ({ bot_id }) => {
                 if (data.img_id) {
                     setImageSrc(`${import.meta.env.VITE_API_URL}/chatbot/avatar/${data.img_id}`)
                 }
+                else {
+                    setImageSrc("");
+                }
             })
-    }, [bot_id])
+    }, [bot_id]);
+
     return (
         <div className="w-full h-full p-5 flex flex-col gap-3">
             <div className="prose xl:prose-xl">
@@ -96,8 +119,17 @@ const ChatbotInterface: React.FC<{ bot_id: string }> = ({ bot_id }) => {
                             accept="image/*" // Accept images only
                         />
                     </div>
-                    <button type="submit" className="btn btn-primary mt-5">
-                        Save
+                    <button type="submit" className="btn btn-outline mt-5">
+                    { isSubmitting
+                        ? <RotatingLines
+                            visible={true}
+                            width="24"
+                            strokeWidth="5"
+                            animationDuration="0.75"
+                            ariaLabel="rotating-lines-loading"
+                        />
+                        : "Save"
+                    }
                     </button>
                 </form>
                 <div className="h-[500px] border p-3 w-1/2 flex flex-col">
@@ -134,7 +166,7 @@ const ChatbotInterface: React.FC<{ bot_id: string }> = ({ bot_id }) => {
                     <div className="flex gap-3 flex-wrap py-3">
                         {
                             suggested.split('\n').map((val, index) => val ?
-                                <button key={index} className="btn btn-primary">
+                                <button key={index} className="btn btn-outline">
                                     {val}
                                 </button>
                                 : null)

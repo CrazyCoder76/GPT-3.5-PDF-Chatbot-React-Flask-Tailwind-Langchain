@@ -5,6 +5,7 @@ import { useToast } from "./toast"
 import ChatbotImage from '../assets/icon-chatbot.png'
 import UserImage from '../assets/icon-user.png'
 import { ThreeDots } from "react-loader-spinner"
+import SendImage from '../assets/send-button.png'
 
 interface Props {
     session_id: string | undefined
@@ -103,7 +104,7 @@ const ChatComponent: React.FC<Props> = ({ session_id }) => {
     }
 
     const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-        if (event.key == 'Enter' && content) {
+        if (event.key == 'Enter' && content && !isAILoading) {
             sendMessage(content);
         }
     }
@@ -181,7 +182,7 @@ const ChatComponent: React.FC<Props> = ({ session_id }) => {
             <div className="flex gap-3 flex-wrap py-2 px-5">
                 {
                     suggested.split('\n').map((val, index) => val ?
-                        <button key={index} className="btn btn-primary" onClick={() => {
+                        <button key={index} className="btn btn-outline" onClick={() => {
                             sendMessage(val);
                         }}>
                             {val}
@@ -189,7 +190,7 @@ const ChatComponent: React.FC<Props> = ({ session_id }) => {
                         : null)
                 }
             </div>
-            <div className="p-5 pt-0">
+            <div className="flex items-center p-5 pt-0 gap-4">
                 <input
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
@@ -198,6 +199,15 @@ const ChatComponent: React.FC<Props> = ({ session_id }) => {
                     placeholder={placeholder}
                     onKeyDown={onKeyDown}
                 />
+                <button
+                    className="btn rounded-xl h-13 px-2 border-neutral-content"
+                    onClick={() => {
+                        content && sendMessage(content);
+                    }}
+                    disabled={isAILoading}
+                >
+                    <img src={SendImage} className="w-10 h-10" />
+                </button>
             </div>
         </div>
     )

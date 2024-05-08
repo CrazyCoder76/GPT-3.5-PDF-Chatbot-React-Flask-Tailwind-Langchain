@@ -4,7 +4,7 @@ import { useToast } from './toast';
 import { useDispatch } from 'react-redux';
 import { addChatbot } from '../redux/chatbot/actions';
 import apiClient from '../utils/apiClient';
-import { RotatingLines } from "react-loader-spinner"
+import { Hourglass } from 'react-loader-spinner';
 
 const AddChatBot: React.FC = () => {
     const [files, setFiles] = useState<File[]>([]);
@@ -45,13 +45,13 @@ const AddChatBot: React.FC = () => {
         })
             .then(response => {
 
-                setIsAddingBot(false);
                 dispatch(addChatbot(response.data));
                 document.getElementById('close_btn')?.click();
 
                 setChatbotPrompt("");
                 setChatBotName("");
                 setFiles([]);
+                setIsAddingBot(false);
             })
             .catch(error => {
                 setIsAddingBot(false);
@@ -68,9 +68,9 @@ const AddChatBot: React.FC = () => {
             </label>
             <input type="checkbox" id="my_modal_6" className="modal-toggle" />
             <div className="modal" role="dialog">
-                <div className="modal-box">
+                <div className="modal-box relative">
                     <h3 className="font-bold text-lg">Create your own chatbot</h3>
-                    <form id='chatbot_form' className="form-control p-4 space-y-4" onSubmit={onSubmit}>
+                    <form id='chatbot_form' className="form-control pt-4 space-y-4" onSubmit={onSubmit}>
                         <input
                             type='text'
                             className='input input-bordered w-full'
@@ -95,20 +95,23 @@ const AddChatBot: React.FC = () => {
                         <button id='submit_btn' type='submit' hidden />
                     </form>
                     <div className="modal-action">
-                        <button className='btn' onClick={createBotClicked}>
-                        { isAddingBot
-                            ? <RotatingLines
-                                visible={true}
-                                width="24"
-                                strokeWidth="5"
-                                animationDuration="0.75"
-                                ariaLabel="rotating-lines-loading"
-                            />
-                            : "Create"
-                        }
-                        </button>
+                        <button className='btn' onClick={createBotClicked}>Create</button>
                         <label htmlFor="my_modal_6" id='close_btn' className="btn">Close</label>
                     </div>
+                    { isAddingBot && 
+                        <div className='absolute top-0 left-0 w-full h-full bg-black bg-opacity-[0.6] flex flex-col gap-4 items-center justify-center'>
+                            <Hourglass
+                                visible={true}
+                                height="120"
+                                width="120"
+                                ariaLabel="hourglass-loading"
+                                wrapperStyle={{}}
+                                wrapperClass=""
+                                colors={['#efefef', '#9a9a9a']}
+                            />
+                            <p className='text-white text-xl text-center'>Please wait a moment.<br></br>This will take about 1 minute...</p>
+                        </div>
+                    }
                 </div>
             </div>
         </>
