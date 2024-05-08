@@ -128,6 +128,17 @@ def delete_chatbot(current_user):
     if bot is None:
         return {'message':'You are not allowed'}, 400
     
+    if os.path.exists(f"index_store/{bot.index_name}"):
+        shutil.rmtree(f"index_store/{bot.index_name}")
+
+    if bot.img_id:
+        if os.path.exists(f"app/avatar/{bot.img_id}"):
+            os.remove(f"app/avatar/{bot.img_id}")
+    
+    sessions = ChatbotSession.query.filter_by(chatbot_id = bot.id)
+    
+    db.session.delete(sessions)
+
     db.session.delete(bot)
     db.session.commit()
     return {'message': 'Chatbot deleted successfully'}, 200
