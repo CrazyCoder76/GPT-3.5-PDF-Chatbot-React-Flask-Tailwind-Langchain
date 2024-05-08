@@ -6,7 +6,6 @@ python-dotenv
 psycopg2-binary
 pyjwt
 flask-bcrypt
-google-auth
 gevent
 requests
 PyPDF2
@@ -14,6 +13,5 @@ langchain==0.1.4
 openai
 tiktoken
 langchain_openai
-sentence-transformers
 faiss-cpu
 gunicorn

@@ -40,7 +40,7 @@ const ChatComponent: React.FC<Props> = ({ session_id }) => {
                 setMessages([{ from: 'ai', message: data.initial }])
                 setPlaceholder(data.placeholder)
                 if (data.img_id) {
-                    setImageSrc(`${import.meta.env.VITE_API_URL}/avatar/${data.img_id}`)
+                    setImageSrc(`${import.meta.env.VITE_API_URL}/chatbot/avatar/${data.img_id}`)
                 }
             })
     }, [session_id])

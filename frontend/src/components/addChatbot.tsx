@@ -18,7 +18,7 @@ const AddChatBot: React.FC = () => {
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
             setFiles(Array.from(event.target.files));
-        } else setFiles([])
+        } else setFiles([]);
     };
 
     // Handle chatbot prompt change
@@ -31,10 +31,10 @@ const AddChatBot: React.FC = () => {
     }
     const onSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const formData = new FormData()
-        files.forEach(file => formData.append('files', file))
-        formData.append('prompt', chatbotPrompt)
-        formData.append('name', chatbotName)
+        const formData = new FormData();
+        files.forEach(file => formData.append('files', file));
+        formData.append('prompt', chatbotPrompt);
+        formData.append('name', chatbotName);
 
         setIsAddingBot(true);
 
@@ -46,21 +46,25 @@ const AddChatBot: React.FC = () => {
             .then(response => {
 
                 setIsAddingBot(false);
-                dispatch(addChatbot(response.data))
-                document.getElementById('close_btn')?.click()
+                dispatch(addChatbot(response.data));
+                document.getElementById('close_btn')?.click();
+
+                setChatbotPrompt("");
+                setChatBotName("");
+                setFiles([]);
             })
             .catch(error => {
                 setIsAddingBot(false);
-                addToast(error.response.data.message, 'error')
+                addToast(error.response.data.message, 'error');
             })
     }
     return (
         <>
-            <label htmlFor="my_modal_6" className="btn btn-primary">
+            <label htmlFor="my_modal_6" className="btn rounded-xl shadow-none">
                 <svg className="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14m-7 7V5" />
                 </svg>
-                Create New
+                Create a new bot
             </label>
             <input type="checkbox" id="my_modal_6" className="modal-toggle" />
             <div className="modal" role="dialog">

@@ -1,4 +1,4 @@
-from flask import Blueprint, request, send_from_directory
+from flask import Blueprint, request
 from ..models.User import User
 from .. import bcrypt
 from .. import db
@@ -86,8 +86,3 @@ def login():
         'last_name': validated_user.last_name,
         'superuser': validated_user.superuser
     }}
-
-
-@auth_bp.route('/avatar/<img_id>')
-def get_image(img_id):
-    return send_from_directory('avatar', img_id)

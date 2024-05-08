@@ -4,7 +4,7 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain_openai.chat_models import ChatOpenAI
 
 import uuid
-from flask import Blueprint, request, current_app
+from flask import Blueprint, request, current_app, send_from_directory
 from auth_middleware import token_required
 from .. import db
 from app.models.Chatbot import Chatbot
@@ -31,6 +31,13 @@ def add_bot(current_user):
     files = request.files
     file_names = []
     chatbot_id = uuid.uuid4().hex
+
+    if not os.path.exists("upload"):
+        os.mkdir("upload")
+
+    if not os.path.exists("index_store"):
+        os.mkdir("index_store")
+
     os.mkdir(f"upload/{chatbot_id}")
 
     for key, storage in files.items(multi=True):
@@ -245,3 +252,7 @@ def get_ai_resposne(current_user):
     db.session.commit()
 
     return { "answer": answer, "chat_history": chat_history }
+
+@chatbot_bp.route('/avatar/<img_id>')
+def get_image(img_id):
+    return send_from_directory('avatar', img_id)

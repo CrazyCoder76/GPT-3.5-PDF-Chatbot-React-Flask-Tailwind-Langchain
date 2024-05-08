@@ -1,16 +1,14 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import { HexAlphaColorPicker } from "react-colorful";
 import ChatbotImage from '../assets/icon-chatbot.png'
 import UserImage from '../assets/icon-user.png'
 import apiClient from "../utils/apiClient";
-// Import React and necessary hooks
+
+
 const ChatbotInterface: React.FC<{ bot_id: string }> = ({ bot_id }) => {
     const [suggested, setSuggested] = useState<string>("")
     const [placeholder, setPlaceholder] = useState<string>("Write your sentences here.")
     const [initial, setInitial] = useState<string>("Hi! How can I assist you toady?")
     const [imageSrc, setImageSrc] = useState('')
-    const [color, setColor] = useState("#aabbcc")
-    const [useCustom, setUseCustom] = useState(false)
     const [file, setFile] = useState<File>()
     const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
@@ -34,8 +32,6 @@ const ChatbotInterface: React.FC<{ bot_id: string }> = ({ bot_id }) => {
         formData.append('placeholder', placeholder)
         formData.append('initial', initial)
         if (file) formData.append('files', file)
-        formData.append('bot_msg_bg_color', color)
-        formData.append('use_custom', useCustom ? 'true' : 'false')
         apiClient.post(`${import.meta.env.VITE_API_URL}/chatbot/update_chatbot_setting`, formData,
             {
                 headers: {
@@ -52,10 +48,8 @@ const ChatbotInterface: React.FC<{ bot_id: string }> = ({ bot_id }) => {
                 setSuggested(data.suggested)
                 setInitial(data.initial)
                 setPlaceholder(data.placeholder)
-                setUseCustom(data.use_custom)
-                setColor(data.bot_msg_bg_color)
                 if (data.img_id) {
-                    setImageSrc(`${import.meta.env.VITE_API_URL}/avatar/${data.img_id}`)
+                    setImageSrc(`${import.meta.env.VITE_API_URL}/chatbot/avatar/${data.img_id}`)
                 }
             })
     }, [bot_id])
@@ -63,7 +57,6 @@ const ChatbotInterface: React.FC<{ bot_id: string }> = ({ bot_id }) => {
         <div className="w-full h-full p-5 flex flex-col gap-3">
             <div className="prose xl:prose-xl">
                 <h1>Chat Interface</h1>
-                Note: Applies when embedded on a website
             </div>
             <div className="flex flex-row gap-5">
                 <form className="form-control gap-2 w-1/2" onSubmit={onSubmit}>
@@ -103,20 +96,7 @@ const ChatbotInterface: React.FC<{ bot_id: string }> = ({ bot_id }) => {
                             accept="image/*" // Accept images only
                         />
                     </div>
-                    <label className="label cursor-pointer">
-                        <span >Use custom background</span>
-                        <input
-                            checked={useCustom}
-                            onChange={(e) => setUseCustom(e.target.checked)}
-                            type="checkbox"
-                            className="checkbox checkbox-primary" />
-                    </label>
-                    <HexAlphaColorPicker
-                        color={color}
-                        onChange={(newColor) => {
-                            setColor(newColor)
-                        }} />
-                    <button type="submit" className="btn btn-primary">
+                    <button type="submit" className="btn btn-primary mt-5">
                         Save
                     </button>
                 </form>
@@ -134,8 +114,7 @@ const ChatbotInterface: React.FC<{ bot_id: string }> = ({ bot_id }) => {
                                         </div>
                                     </div>
                                     <div
-                                        style={{ backgroundColor: useCustom ? color : 'var(--fallback-pc,oklch(var(--pc)/var(--tw-bg-opacity)))' }}
-                                        className="chat-bubble prose xl:prose-xl">
+                                        className="chat-bubble prose xl:prose-xl bg-base-300">
                                         {val}
                                     </div>
                                 </div>
@@ -147,7 +126,7 @@ const ChatbotInterface: React.FC<{ bot_id: string }> = ({ bot_id }) => {
                                     <img alt="Tailwind CSS chat bubble component" src={UserImage} />
                                 </div>
                             </div>
-                            <div className="chat-bubble bg-secondary-content prose xl:prose-xl">
+                            <div className="chat-bubble bg-primary-content prose xl:prose-xl">
                                 Hi
                             </div>
                         </div>

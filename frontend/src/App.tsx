@@ -6,6 +6,7 @@ import AuthRoute from './components/authRoute'
 import NotFound from './pages/auth/notfound'
 import { ToastProvider } from './components/toast.tsx'
 import { useEffect, useState } from 'react'
+import "./App.css";
 
 function App() {
   const [theme, setTheme] = useState('')

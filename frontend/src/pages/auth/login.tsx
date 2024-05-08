@@ -30,8 +30,8 @@ const Login = () => {
     }
 
     return (
-        <div className='h-[100vh] flex flex-col items-center justify-center gap-3'>
-            <div className='prose lg:prose-xl m-3'>
+        <div className='h-[100vh] flex flex-col items-center justify-center gap-20'>
+            <div className='prose lg:prose-xl'>
                 <h1>Login to your account</h1>
             </div>
             <form className='form-control gap-3' onSubmit={onSubmit}>
@@ -46,10 +46,10 @@ const Login = () => {
                 <button type='submit' className='btn btn-primary'>
                     Sign In
                 </button>
+                <div>
+                    Not registered yet? <Link to='/register'>Register</Link>
+                </div>
             </form>
-            <div>
-                Not registered yet? <Link to='/register'>Register</Link>
-            </div>
         </div>
     )
 }

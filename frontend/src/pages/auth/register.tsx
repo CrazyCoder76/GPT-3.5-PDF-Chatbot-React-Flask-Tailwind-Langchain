@@ -4,8 +4,9 @@ import apiClient from '../../utils/apiClient';
 import { useToast } from '../../components/toast';
 
 const Register = () => {
-    const navigate = useNavigate()
-    const { addToast } = useToast()
+    const navigate = useNavigate();
+    const { addToast } = useToast();
+
     const onSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const data: any = e.currentTarget.elements
@@ -27,8 +28,9 @@ const Register = () => {
                 addToast(error.response.data.message, 'error')
             })
     }
+
     return (
-        <div className='h-[100vh] flex flex-col items-center justify-center gap-3'>
+        <div className='h-[100vh] flex flex-col items-center justify-center gap-10'>
             <div className='prose xl:prose-xl m-3'>
                 <h1>Register your account</h1>
             </div>
@@ -56,10 +58,10 @@ const Register = () => {
                 <button type='submit' className='btn btn-primary'>
                     Register
                 </button>
+                <span>
+                    Alread have an account? <Link to='/login'>Login</Link>
+                </span>
             </form>
-            <span>
-                Alread have an account? <Link to='/login'>Login</Link>
-            </span>
         </div>
     )
 }
