@@ -1,4 +1,3 @@
-```
 # PDFGPT
 
 PDFGPT is a web application built with React and Flask that leverages the power of OpenAI's GPT-3.5 model to generate text summaries and responses based on input PDF documents. It utilizes various technologies and libraries including Langchain, FAISS, OpenAI embedding, and GPT-3.5 turbo model.
